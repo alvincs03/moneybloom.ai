@@ -2,13 +2,13 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { signIn, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Nav from '@/components/Nav';
-import { useAuth } from '@/contexts/AuthContext';
 
 export default function SignIn() {
   const router = useRouter();
-  const { signIn, signInWithGoogle, user } = useAuth();
+  const { data: session } = useSession();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -21,10 +21,19 @@ export default function SignIn() {
     setLoading(true);
 
     try {
-      await signIn(email, password);
-      router.push('/dashboard');
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError('Invalid email or password');
+      } else if (result?.ok) {
+        router.push('/dashboard');
+      }
     } catch (err) {
-      setError('Failed to sign in. Check your credentials.');
+      setError('Failed to sign in');
     } finally {
       setLoading(false);
     }
@@ -32,14 +41,13 @@ export default function SignIn() {
 
   const handleGoogleSignIn = async () => {
     try {
-      await signInWithGoogle();
-      router.push('/dashboard');
+      await signIn('google', { redirectTo: '/dashboard' });
     } catch (err) {
       setError('Google sign-in failed');
     }
   };
 
-  if (user) {
+  if (session?.user) {
     router.push('/dashboard');
     return null;
   }

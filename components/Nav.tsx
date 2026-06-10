@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSession, signOut } from 'next-auth/react';
 
 export default function Nav() {
-  const { user, signOut } = useAuth();
+  const { data: session } = useSession();
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -30,10 +30,10 @@ export default function Nav() {
         <Link href="/contact" className="hover:text-[#c46039] transition">Contact</Link>
       </div>
       <div className="flex gap-4 items-center">
-        {user ? (
+        {session?.user ? (
           <>
-            <span className="text-sm text-gray-600">{user.email}</span>
-            <button onClick={signOut} className="px-6 py-2 bg-gray-200 text-gray-900 rounded-full text-sm font-medium hover:bg-gray-300 transition">
+            <span className="text-sm text-gray-600">{session.user.email}</span>
+            <button onClick={() => signOut({ redirectTo: '/' })} className="px-6 py-2 bg-gray-200 text-gray-900 rounded-full text-sm font-medium hover:bg-gray-300 transition">
               Sign Out
             </button>
           </>

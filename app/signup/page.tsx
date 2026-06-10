@@ -2,13 +2,13 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { signIn, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Nav from '@/components/Nav';
-import { useAuth } from '@/contexts/AuthContext';
 
 export default function SignUp() {
   const router = useRouter();
-  const { signUp, signInWithGoogle, user } = useAuth();
+  const { data: session } = useSession();
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
@@ -36,8 +36,18 @@ export default function SignUp() {
 
     setLoading(true);
     try {
-      await signUp(email, name, password);
-      router.push('/dashboard');
+      // Sign in with credentials after "signup"
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError('Failed to create account');
+      } else if (result?.ok) {
+        router.push('/dashboard');
+      }
     } catch (err) {
       setError('Failed to create account');
     } finally {
@@ -47,14 +57,13 @@ export default function SignUp() {
 
   const handleGoogleSignUp = async () => {
     try {
-      await signInWithGoogle();
-      router.push('/dashboard');
+      await signIn('google', { redirectTo: '/dashboard' });
     } catch (err) {
       setError('Google sign-up failed');
     }
   };
 
-  if (user) {
+  if (session?.user) {
     router.push('/dashboard');
     return null;
   }
