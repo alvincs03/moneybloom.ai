@@ -1,8 +1,8 @@
-import NextAuth from "next-auth";
-import Google from "next-auth/providers/google";
-import Credentials from "next-auth/providers/credentials";
+import NextAuth from "@auth/nextjs";
+import Google from "@auth/nextjs/providers/google";
+import Credentials from "@auth/nextjs/providers/credentials";
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const { handlers, auth } = NextAuth({
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -15,7 +15,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        // Mock implementation - in production, verify against database
         if (credentials?.email && credentials?.password) {
           return {
             id: credentials.email,
@@ -47,4 +46,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
 });
 
-export { handlers as GET, handlers as POST };
+export const { GET, POST } = handlers;
