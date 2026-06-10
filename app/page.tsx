@@ -1,10 +1,25 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Nav from '@/components/Nav';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Home() {
+  const router = useRouter();
+  const { user } = useAuth();
+
+  const handleFindScholarships = () => {
+    if (!user) {
+      router.push('/signin');
+    } else {
+      router.push('/dashboard');
+    }
+  };
   return (
     <div className="min-h-screen bg-[#f5f0e8]">
       <Nav />
+      <div className="pt-20"></div>
 
       {/* Hero */}
       <section className="py-20 px-12 text-center animate-fade-in">
@@ -13,9 +28,9 @@ export default function Home() {
         <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
           A free tool for students. We rank scholarships by your odds of winning, not by award size.
         </p>
-        <Link href="/dashboard" className="inline-block px-8 py-3 bg-[#c46039] text-white rounded-full font-medium hover:opacity-90">
+        <button onClick={handleFindScholarships} className="inline-block px-8 py-3 bg-[#c46039] text-white rounded-full font-medium hover:opacity-90 cursor-pointer">
           Find my scholarships →
-        </Link>
+        </button>
       </section>
 
       {/* Problem section */}
@@ -87,9 +102,9 @@ export default function Home() {
       <section className="py-20 px-12 bg-[#2a2a2a] text-white text-center animate-fade-in">
         <h2 className="text-3xl font-bold mb-4">The Common App opens August 1</h2>
         <p className="mb-8">Start your scholarship list today. Takes 5 minutes.</p>
-        <Link href="/dashboard" className="inline-block px-8 py-3 bg-[#c46039] text-white rounded-full font-medium hover:opacity-90">
+        <button onClick={handleFindScholarships} className="inline-block px-8 py-3 bg-[#c46039] text-white rounded-full font-medium hover:opacity-90 cursor-pointer">
           Find my scholarships →
-        </Link>
+        </button>
       </section>
     </div>
   );
