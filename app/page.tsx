@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Nav from '@/components/Nav';
-import { useSession } from '@auth/react';
+import { useSession } from 'next-auth/react';
 
 export default function Home() {
   const router = useRouter();

@@ -1,8 +1,10 @@
-import NextAuth from "@auth/nextjs";
-import Google from "@auth/nextjs/providers/google";
-import Credentials from "@auth/nextjs/providers/credentials";
+import NextAuth from "next-auth";
+import Google from "next-auth/providers/google";
+import Credentials from "next-auth/providers/credentials";
 
 export const { handlers, auth } = NextAuth({
+  secret: process.env.NEXTAUTH_SECRET,
+  trustHost: true,
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,

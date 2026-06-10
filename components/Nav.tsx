@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useSession, signOut } from '@auth/react';
+import { useSession, signOut } from 'next-auth/react';
 
 export default function Nav() {
   const { data: session } = useSession();

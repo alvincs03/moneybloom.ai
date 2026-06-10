@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signIn, useSession } from '@auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Nav from '@/components/Nav';
 
