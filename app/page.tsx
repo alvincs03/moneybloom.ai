@@ -3,14 +3,14 @@
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Nav from '@/components/Nav';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSession } from 'next-auth/react';
 
 export default function Home() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { data: session } = useSession();
 
   const handleFindScholarships = () => {
-    if (!user) {
+    if (!session?.user) {
       router.push('/signin');
     } else {
       router.push('/dashboard');
