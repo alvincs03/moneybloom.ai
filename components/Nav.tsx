@@ -19,17 +19,17 @@ export default function Nav() {
   return (
     <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
       isScrolled ? 'bg-white/90 backdrop-blur-md shadow-sm' : 'bg-transparent'
-    } px-12 py-6 flex items-center justify-between`}>
-      <Link href="/" className="flex items-center gap-2 font-bold text-lg">
+    } px-12 py-6 grid grid-cols-3 items-center`}>
+      <Link href="/" className="flex items-center gap-2 font-bold text-lg justify-self-start">
         <img src="/favicon.svg" alt="moneybloom" className="w-5 h-5" />
         <span>moneybloom</span>
       </Link>
-      <div className="flex gap-8 text-sm">
+      <div className="flex gap-8 text-sm justify-self-center">
         <Link href="/about" className="hover:text-[#c46039] transition">About</Link>
         <Link href="/faq" className="hover:text-[#c46039] transition">FAQ</Link>
         <Link href="/contact" className="hover:text-[#c46039] transition">Contact</Link>
       </div>
-      <div className="flex gap-4 items-center">
+      <div className="flex gap-4 items-center justify-self-end">
         {session?.user ? (
           <>
             <span className="text-sm text-gray-600">{session.user.email}</span>

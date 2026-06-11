@@ -49,7 +49,7 @@ export default function Scholarships() {
 
         <div className="space-y-4">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="bg-white rounded-lg overflow-hidden flex animate-slide-in-right" style={{ animationDelay: `${(i-1) * 0.1}s` }}>
+            <div key={i} className="bg-white rounded-lg overflow-hidden flex animate-slide-in-right" style={{ animationDelay: `${(i-1) * 0.18}s` }}>
               <div className="w-24 h-24 bg-gradient-to-br from-[#c46039] to-[#5b9e9a] flex-shrink-0 flex items-center justify-center">
                 <div className="text-white text-2xl font-bold opacity-20">S{i}</div>
               </div>

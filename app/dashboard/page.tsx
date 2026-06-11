@@ -108,7 +108,7 @@ export default function Dashboard() {
           {/* Scholarship cards */}
           <div className="space-y-4">
             {scholarships.map((scholarship, idx) => (
-              <div key={scholarship.id} className="bg-white rounded-lg overflow-hidden border-l-4 border-[#5b9e9a] animate-slide-in-right flex" style={{ animationDelay: `${idx * 0.1}s` }}>
+              <div key={scholarship.id} className="bg-white rounded-lg overflow-hidden border-l-4 border-[#5b9e9a] animate-slide-in-right flex" style={{ animationDelay: `${idx * 0.18}s` }}>
                 <div className="w-32 h-32 bg-gradient-to-br from-[#c46039] to-[#5b9e9a] flex-shrink-0 flex items-center justify-center">
                   <div className="text-white text-4xl font-bold opacity-20">
                     {scholarship.name.charAt(0)}

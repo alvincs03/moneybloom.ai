@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { signIn, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Nav from '@/components/Nav';
+import { registerUser } from './actions';
 
 export default function SignUp() {
   const router = useRouter();
@@ -36,7 +37,14 @@ export default function SignUp() {
 
     setLoading(true);
     try {
-      // Sign in with credentials after "signup"
+      // Create the account in the database first.
+      const reg = await registerUser(email, name, password);
+      if (!reg.ok) {
+        setError(reg.error);
+        return;
+      }
+
+      // Then sign them in with the new credentials.
       const result = await signIn('credentials', {
         email,
         password,
@@ -44,7 +52,7 @@ export default function SignUp() {
       });
 
       if (result?.error) {
-        setError('Failed to create account');
+        setError('Account created, but sign-in failed. Try signing in.');
       } else if (result?.ok) {
         router.push('/dashboard');
       }
