@@ -95,9 +95,19 @@ model Profile {
   state     String?
   locality  String? // urban / suburban / rural
 
-  // Activities & essays
+  // Activities & awards
   activities String? // free text / comma separated
-  bio        String?
+  awards     String? // honors, awards, distinctions
+  bio        String? // short one-line headline
+
+  // Essays
+  personalStatement String? // main personal statement
+  // Optional essays mapped to common scholarship prompts
+  challengeEssay   String? // a challenge or obstacle overcome
+  communityEssay   String? // community involvement / impact
+  goalsEssay       String? // academic & career goals
+  leadershipEssay  String? // a leadership experience
+  diversityEssay   String? // background / diversity / what makes you unique
 
   completedAt DateTime? // set when the questionnaire is first completed
   updatedAt   DateTime  @updatedAt

@@ -116,6 +116,8 @@ export default async function Profile() {
                         ? "bg-green-100 text-green-700"
                         : status === "Incomplete"
                         ? "bg-orange-100 text-orange-700"
+                        : status === "Optional"
+                        ? "bg-blue-50 text-blue-600"
                         : "bg-gray-100 text-gray-500"
                     }`}
                   >
@@ -129,7 +131,15 @@ export default async function Profile() {
                     return (
                       <div key={field.key}>
                         <p className="text-xs text-gray-600 font-semibold">{field.label}</p>
-                        <p className={muted ? "text-gray-400" : "text-gray-900"}>{text}</p>
+                        <p
+                          className={`${muted ? "text-gray-400" : "text-gray-900"} ${
+                            field.type === "textarea" && !muted
+                              ? "text-sm line-clamp-2 whitespace-pre-line"
+                              : ""
+                          }`}
+                        >
+                          {text}
+                        </p>
                       </div>
                     );
                   })}
