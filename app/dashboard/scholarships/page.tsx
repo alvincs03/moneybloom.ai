@@ -3,7 +3,10 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { prisma } from "@/lib/prisma";
 import {
   FILTER_TAGS,
+  TAG_GROUPS,
   AMOUNT_FILTERS,
+  US_STATES,
+  isValidState,
   parseTags,
   formatAmount,
   safeExternalUrl,
@@ -12,17 +15,19 @@ import type { Prisma } from "@prisma/client";
 
 // A curated subset of tags shown as quick-filter chips.
 const FEATURED_TAGS = ["STEM", "Arts", "First-Gen", "Low Income", "Local", "Leadership"];
+const ETHNICITY_TAGS = TAG_GROUPS["Race & Ethnicity"];
 
 export default async function Scholarships({
   searchParams,
 }: {
-  searchParams: Promise<{ tag?: string; amount?: string; q?: string }>;
+  searchParams: Promise<{ tag?: string; amount?: string; q?: string; state?: string }>;
 }) {
-  const { tag, amount, q } = await searchParams;
+  const { tag, amount, q, state } = await searchParams;
 
   const where: Prisma.ScholarshipWhereInput = { status: "USABLE" };
+  const and: Prisma.ScholarshipWhereInput[] = [];
 
-  if (tag && FILTER_TAGS.includes(tag as never)) {
+  if (tag && FILTER_TAGS.includes(tag)) {
     where.tags = { contains: tag };
   }
   if (amount && AMOUNT_FILTERS[amount]) {
@@ -32,24 +37,32 @@ export default async function Scholarships({
     if (range.max) amt.lte = range.max;
     where.amountValue = amt;
   }
+  if (state && isValidState(state)) {
+    // Show scholarships for that state plus national (state-agnostic) ones.
+    and.push({ OR: [{ state }, { state: null }] });
+  }
   if (q && q.trim()) {
     const term = q.trim().slice(0, 100);
-    where.OR = [
-      { name: { contains: term } },
-      { organization: { contains: term } },
-      { description: { contains: term } },
-    ];
+    and.push({
+      OR: [
+        { name: { contains: term } },
+        { organization: { contains: term } },
+        { description: { contains: term } },
+      ],
+    });
   }
+  if (and.length) where.AND = and;
 
   const [count, scholarships] = await Promise.all([
     prisma.scholarship.count({ where }),
     prisma.scholarship.findMany({ where, orderBy: { amountValue: "desc" }, take: 60 }),
   ]);
 
-  // Build an href that toggles a tag while preserving other params.
+  // Build an href that toggles a tag/amount while preserving other params.
   const chipHref = (key: "tag" | "amount", value: string | null) => {
     const params = new URLSearchParams();
     if (q) params.set("q", q);
+    if (state) params.set("state", state);
     if (key === "tag") {
       if (value) params.set("tag", value);
       if (amount) params.set("amount", amount);
@@ -69,6 +82,7 @@ export default async function Scholarships({
         <form method="get" className="mb-6">
           {tag && <input type="hidden" name="tag" value={tag} />}
           {amount && <input type="hidden" name="amount" value={amount} />}
+          {state && <input type="hidden" name="state" value={state} />}
           <input
             type="text"
             name="q"
@@ -101,19 +115,63 @@ export default async function Scholarships({
           ))}
         </div>
 
-        {/* Amount filters */}
-        <div className="flex gap-2 mb-6 flex-wrap">
-          {Object.keys(AMOUNT_FILTERS).map((a) => (
+        {/* Race & ethnicity filters */}
+        <div className="flex gap-2 mb-3 flex-wrap items-center">
+          <span className="text-xs font-semibold text-gray-500 mr-1">Race/Ethnicity:</span>
+          {ETHNICITY_TAGS.map((t) => (
             <Link
-              key={a}
-              href={chipHref("amount", amount === a ? null : a)}
+              key={t}
+              href={chipHref("tag", tag === t ? null : t)}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
-                amount === a ? "bg-[#5b9e9a] text-white" : "bg-white text-gray-600 hover:bg-gray-50"
+                tag === t ? "bg-[#c46039] text-white" : "bg-white text-gray-700 hover:bg-gray-50"
               }`}
             >
-              {a}
+              {t}
             </Link>
           ))}
+        </div>
+
+        {/* Amount + location filters */}
+        <div className="flex gap-4 mb-6 flex-wrap items-center">
+          <div className="flex gap-2 flex-wrap">
+            {Object.keys(AMOUNT_FILTERS).map((a) => (
+              <Link
+                key={a}
+                href={chipHref("amount", amount === a ? null : a)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
+                  amount === a ? "bg-[#5b9e9a] text-white" : "bg-white text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                {a}
+              </Link>
+            ))}
+          </div>
+
+          {/* Location filter (state) */}
+          <form method="get" className="flex items-center gap-2">
+            {tag && <input type="hidden" name="tag" value={tag} />}
+            {amount && <input type="hidden" name="amount" value={amount} />}
+            {q && <input type="hidden" name="q" value={q} />}
+            <span className="text-xs font-semibold text-gray-500">Location:</span>
+            <select
+              name="state"
+              defaultValue={state && isValidState(state) ? state : ""}
+              className="px-3 py-1.5 border border-gray-300 rounded-full text-xs bg-white"
+            >
+              <option value="">All locations</option>
+              {US_STATES.map((st) => (
+                <option key={st} value={st}>
+                  {st}
+                </option>
+              ))}
+            </select>
+            <button
+              type="submit"
+              className="px-3 py-1.5 rounded-full text-xs font-medium bg-gray-200 text-gray-800 hover:bg-gray-300"
+            >
+              Apply
+            </button>
+          </form>
         </div>
 
         <p className="text-gray-600 mb-6">{count} scholarship{count === 1 ? "" : "s"} found</p>

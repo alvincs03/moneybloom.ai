@@ -8,31 +8,61 @@ export function isStatus(value: unknown): value is ScholarshipStatus {
   return typeof value === "string" && (SCHOLARSHIP_STATUSES as readonly string[]).includes(value);
 }
 
-// Canonical filter tags an admin may assign during verification. The admin
-// action rejects any tag not in this allowlist, so user-supplied tag strings
-// can never inject arbitrary values.
-export const FILTER_TAGS = [
-  "STEM",
-  "Arts",
-  "Humanities",
-  "Business",
-  "First-Gen",
-  "Low Income",
-  "Women",
-  "Minority",
-  "LGBTQ+",
-  "Disability",
-  "Athletics",
-  "Community Service",
-  "Leadership",
-  "Local",
-  "Military/Veteran",
-  "Religious",
-  "Merit-Based",
-  "Need-Based",
+// Canonical filter tags, grouped by category. The admin UI renders these
+// groups; the flat FILTER_TAGS list (derived below) is the validation
+// allowlist, so user-supplied tag strings can never inject arbitrary values.
+export const TAG_GROUPS: Record<string, string[]> = {
+  "Race & Ethnicity": [
+    "Black/African American",
+    "Hispanic/Latino",
+    "Asian American",
+    "Native American",
+    "Pacific Islander",
+    "Middle Eastern/North African",
+    "Multiracial",
+  ],
+  "Field of Study": ["STEM", "Arts", "Humanities", "Business"],
+  Background: [
+    "First-Gen",
+    "Low Income",
+    "Women",
+    "LGBTQ+",
+    "Disability",
+    "Military/Veteran",
+    "Immigrant",
+    "Religious",
+  ],
+  Type: [
+    "Athletics",
+    "Community Service",
+    "Leadership",
+    "Local",
+    "Merit-Based",
+    "Need-Based",
+  ],
+};
+
+export const FILTER_TAGS = Object.values(TAG_GROUPS).flat();
+
+export type FilterTag = string;
+
+// US states for the location filter. "" is treated as national/any.
+export const US_STATES = [
+  "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
+  "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
+  "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine",
+  "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi",
+  "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey",
+  "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio",
+  "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina",
+  "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia",
+  "Washington", "West Virginia", "Wisconsin", "Wyoming",
+  "District of Columbia",
 ] as const;
 
-export type FilterTag = (typeof FILTER_TAGS)[number];
+export function isValidState(state: string): boolean {
+  return (US_STATES as readonly string[]).includes(state);
+}
 
 const TAG_SET = new Set<string>(FILTER_TAGS);
 

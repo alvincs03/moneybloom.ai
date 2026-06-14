@@ -132,6 +132,7 @@ model Scholarship {
   // Structured fields for filtering
   amountValue  Int? // parsed max award in whole dollars, for range filters
   level        String? // e.g. "High School", "Undergraduate"
+  state        String? // US state this is restricted to; null = national/any
   deadlineDate DateTime? // parsed deadline when available
 
   status     String    @default("PENDING") // PENDING | USABLE | REJECTED

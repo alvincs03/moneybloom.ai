@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { requireAdminAction } from "@/lib/admin";
-import { serializeTags, safeExternalUrl } from "@/lib/scholarships";
+import { serializeTags, safeExternalUrl, isValidState } from "@/lib/scholarships";
 import { composeDescription } from "@/lib/compose-description";
 import { revalidatePath } from "next/cache";
 
@@ -54,6 +54,10 @@ export async function reviewScholarship(formData: FormData) {
   // Tags are validated against the canonical allowlist; anything else is dropped.
   const tags = serializeTags(formData.getAll("tags").map((t) => String(t)));
 
+  // State validated against the US states allowlist; "" => national/any.
+  const stateRaw = formData.get("state");
+  const state = typeof stateRaw === "string" && isValidState(stateRaw) ? stateRaw : null;
+
   await prisma.scholarship.update({
     where: { id },
     data: {
@@ -64,6 +68,7 @@ export async function reviewScholarship(formData: FormData) {
       deadline: str(formData, "deadline", 120),
       url: safeExternalUrl(str(formData, "url", 1000)),
       level: str(formData, "level", 120),
+      state,
       description: bigText(formData, "description", 5000),
       eligibility: bigText(formData, "eligibility", 5000),
       tags,

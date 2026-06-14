@@ -2,7 +2,7 @@ import Link from "next/link";
 import DashboardLayout from "@/components/DashboardLayout";
 import { requireAdminPage } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
-import { FILTER_TAGS, parseTags, isStatus } from "@/lib/scholarships";
+import { TAG_GROUPS, US_STATES, parseTags, isStatus } from "@/lib/scholarships";
 import { reviewScholarship, regenerateDescription } from "./actions";
 
 export default async function AdminScholarships({
@@ -131,6 +131,23 @@ export default async function AdminScholarships({
                           className="w-full px-3 py-2 border border-gray-300 rounded mt-1"
                         />
                       </label>
+                      <label className="block">
+                        <span className="text-xs font-semibold text-gray-600">
+                          State (location-specific)
+                        </span>
+                        <select
+                          name="state"
+                          defaultValue={s.state ?? ""}
+                          className="w-full px-3 py-2 border border-gray-300 rounded mt-1 bg-white"
+                        >
+                          <option value="">National / Any</option>
+                          {US_STATES.map((st) => (
+                            <option key={st} value={st}>
+                              {st}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
                       <label className="block col-span-2">
                         <span className="text-xs font-semibold text-gray-600">Application URL</span>
                         <input
@@ -160,25 +177,31 @@ export default async function AdminScholarships({
                     ↻ Regenerate description
                   </button>
 
-                  {/* Filter tags */}
-                  <div className="mb-5">
-                    <span className="text-xs font-semibold text-gray-600 block mb-2">Filters / Tags</span>
-                    <div className="flex flex-wrap gap-2">
-                      {FILTER_TAGS.map((tag) => (
-                        <label
-                          key={tag}
-                          className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 rounded-full text-sm cursor-pointer hover:bg-gray-50"
-                        >
-                          <input
-                            type="checkbox"
-                            name="tags"
-                            value={tag}
-                            defaultChecked={selectedTags.has(tag)}
-                          />
-                          {tag}
-                        </label>
-                      ))}
-                    </div>
+                  {/* Filter tags, grouped by category */}
+                  <div className="mb-5 space-y-3">
+                    {Object.entries(TAG_GROUPS).map(([group, tags]) => (
+                      <div key={group}>
+                        <span className="text-xs font-semibold text-gray-600 block mb-1.5">
+                          {group}
+                        </span>
+                        <div className="flex flex-wrap gap-2">
+                          {tags.map((tag) => (
+                            <label
+                              key={tag}
+                              className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 rounded-full text-sm cursor-pointer hover:bg-gray-50"
+                            >
+                              <input
+                                type="checkbox"
+                                name="tags"
+                                value={tag}
+                                defaultChecked={selectedTags.has(tag)}
+                              />
+                              {tag}
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
                   </div>
 
                   <div className="flex gap-3 items-center">
