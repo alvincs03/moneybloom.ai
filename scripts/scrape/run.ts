@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { prisma } from "../../lib/prisma";
 import { normalize } from "./normalize";
+import { composeDescription } from "./compose-description";
 import { describeScholarship } from "./describe";
 import type { Source } from "./types";
 
@@ -68,23 +69,25 @@ async function main() {
           });
           updated++;
         } else {
-          // Generate a clean, student-facing description (no-op without an API key).
-          const generated = await describeScholarship({
+          // Write a clean, student-facing description. Free by default
+          // (composed from the scraped facts). Set USE_AI_DESCRIPTIONS=1 to
+          // use the paid Claude path instead.
+          const facts = {
             name: data.name,
             organization: data.organization,
             amount: data.amount,
             eligibility: data.eligibility,
             description: data.description,
             level: data.level,
-          });
+          };
+          const generated = process.env.USE_AI_DESCRIPTIONS
+            ? await describeScholarship(facts)
+            : null;
+          const description =
+            generated ?? composeDescription(facts) ?? data.description;
 
           await prisma.scholarship.create({
-            data: {
-              ...data,
-              description: generated ?? data.description,
-              url,
-              status: "PENDING",
-            },
+            data: { ...data, description, url, status: "PENDING" },
           });
           inserted++;
         }
