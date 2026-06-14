@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireAdminAction } from "@/lib/admin";
 import { serializeTags, safeExternalUrl } from "@/lib/scholarships";
+import { composeDescription } from "@/lib/compose-description";
 import { revalidatePath } from "next/cache";
 
 function str(formData: FormData, key: string, maxLen: number): string | null {
@@ -73,4 +74,35 @@ export async function reviewScholarship(formData: FormData) {
 
   revalidatePath("/admin/scholarships");
   revalidatePath("/dashboard/scholarships");
+}
+
+// Rebuild a single scholarship's description from its structured fields, for
+// free (no API). Composes from name/org/amount/level/eligibility.
+export async function regenerateDescription(formData: FormData) {
+  await requireAdminAction();
+
+  const id = formData.get("id");
+  if (typeof id !== "string" || !id) {
+    throw new Error("Missing scholarship id");
+  }
+
+  const s = await prisma.scholarship.findUnique({ where: { id } });
+  if (!s) throw new Error("Scholarship not found");
+
+  const description = composeDescription({
+    name: s.name,
+    organization: s.organization,
+    amount: s.amount,
+    eligibility: s.eligibility,
+    level: s.level,
+    // Omit the current description so we rebuild from the facts.
+    description: null,
+  });
+
+  await prisma.scholarship.update({
+    where: { id },
+    data: { description: description ?? s.description },
+  });
+
+  revalidatePath("/admin/scholarships");
 }

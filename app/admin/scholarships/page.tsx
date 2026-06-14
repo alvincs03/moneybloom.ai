@@ -3,7 +3,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { requireAdminPage } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 import { FILTER_TAGS, parseTags, isStatus } from "@/lib/scholarships";
-import { reviewScholarship } from "./actions";
+import { reviewScholarship, regenerateDescription } from "./actions";
 
 export default async function AdminScholarships({
   searchParams,
@@ -142,7 +142,7 @@ export default async function AdminScholarships({
                     </div>
                   </div>
 
-                  <label className="block mb-4">
+                  <label className="block mb-2">
                     <span className="text-xs font-semibold text-gray-600">Description</span>
                     <textarea
                       name="description"
@@ -151,6 +151,14 @@ export default async function AdminScholarships({
                       className="w-full px-3 py-2 border border-gray-300 rounded mt-1"
                     />
                   </label>
+                  <button
+                    type="submit"
+                    formAction={regenerateDescription}
+                    className="mb-4 text-xs text-[#c46039] font-semibold hover:underline"
+                    title="Rebuild the description from this scholarship's fields (free, no API)"
+                  >
+                    ↻ Regenerate description
+                  </button>
 
                   {/* Filter tags */}
                   <div className="mb-5">

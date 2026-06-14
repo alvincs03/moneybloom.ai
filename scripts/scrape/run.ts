@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { prisma } from "../../lib/prisma";
 import { normalize } from "./normalize";
-import { composeDescription } from "./compose-description";
+import { composeDescription } from "../../lib/compose-description";
 import { describeScholarship } from "./describe";
 import type { Source } from "./types";
 
