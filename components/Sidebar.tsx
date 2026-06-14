@@ -1,10 +1,17 @@
 import Link from 'next/link';
+import { auth } from '@/auth';
+import { isAdminEmail } from '@/lib/admin';
 
 interface SidebarProps {
   active?: string;
 }
 
-export default function Sidebar({ active = 'dashboard' }: SidebarProps) {
+export default async function Sidebar({ active = 'dashboard' }: SidebarProps) {
+  const session = await auth();
+  const email = session?.user?.email ?? '';
+  const name = session?.user?.name || email.split('@')[0] || 'Account';
+  const initial = name.charAt(0).toUpperCase();
+
   const items = [
     { id: 'dashboard', label: 'Dashboard', href: '/dashboard' },
     { id: 'scholarships', label: 'Scholarships', href: '/dashboard/scholarships' },
@@ -12,6 +19,10 @@ export default function Sidebar({ active = 'dashboard' }: SidebarProps) {
     { id: 'deadlines', label: 'Deadlines', href: '/dashboard/deadlines' },
     { id: 'profile', label: 'Profile', href: '/dashboard/profile' },
   ];
+
+  if (isAdminEmail(email)) {
+    items.push({ id: 'admin', label: 'Review Scholarships', href: '/admin/scholarships' });
+  }
 
   return (
     <aside className="w-60 bg-[#3c3c3c] text-white flex flex-col fixed left-0 top-0 h-screen">
@@ -40,11 +51,11 @@ export default function Sidebar({ active = 'dashboard' }: SidebarProps) {
 
       <div className="p-4 border-t border-gray-700 flex items-center gap-3">
         <div className="w-10 h-10 bg-[#c46039] rounded-full flex items-center justify-center text-sm font-bold">
-          AC
+          {initial}
         </div>
-        <div className="text-sm">
-          <p className="font-medium">Alvin Chen</p>
-          <p className="text-gray-400 text-xs">First-Gen Student</p>
+        <div className="text-sm overflow-hidden">
+          <p className="font-medium truncate">{name}</p>
+          <p className="text-gray-400 text-xs truncate">{email}</p>
         </div>
       </div>
     </aside>

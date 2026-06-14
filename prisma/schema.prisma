@@ -126,10 +126,17 @@ model Scholarship {
   eligibility  String?
   url          String? // official application URL
   sourceUrl    String? // where we scraped it from
-  tags         String? // comma-separated tags
+  source       String? // which scraper plugin produced this row
+  tags         String? // comma-separated tags (canonical filter tags)
 
-  status     String   @default("PENDING") // PENDING | USABLE | REJECTED
-  scrapedAt  DateTime @default(now())
+  // Structured fields for filtering
+  amountValue   Int? // parsed max award in whole dollars, for range filters
+  essayRequired Boolean? // false => qualifies for the "No Essay" filter
+  level         String? // e.g. "High School", "Undergraduate"
+  deadlineDate  DateTime? // parsed deadline when available
+
+  status     String    @default("PENDING") // PENDING | USABLE | REJECTED
+  scrapedAt  DateTime  @default(now())
   reviewedAt DateTime?
 
   @@unique([name, url])
