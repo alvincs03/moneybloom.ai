@@ -11,7 +11,7 @@ import {
 import type { Prisma } from "@prisma/client";
 
 // A curated subset of tags shown as quick-filter chips.
-const FEATURED_TAGS = ["No Essay", "STEM", "Arts", "First-Gen", "Low Income", "Local", "Leadership"];
+const FEATURED_TAGS = ["STEM", "Arts", "First-Gen", "Low Income", "Local", "Leadership"];
 
 export default async function Scholarships({
   searchParams,

@@ -12,7 +12,6 @@ export function isStatus(value: unknown): value is ScholarshipStatus {
 // action rejects any tag not in this allowlist, so user-supplied tag strings
 // can never inject arbitrary values.
 export const FILTER_TAGS = [
-  "No Essay",
   "STEM",
   "Arts",
   "Humanities",

@@ -10,7 +10,6 @@ export interface ScrapedScholarship {
   description?: string | null;
   eligibility?: string | null;
   url?: string | null; // official/application URL
-  essayRequired?: boolean | null;
   level?: string | null;
   tags?: string[]; // suggested tags (admin still verifies)
   sourceUrl?: string | null; // page it was scraped from

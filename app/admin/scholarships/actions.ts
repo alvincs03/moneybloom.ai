@@ -43,10 +43,6 @@ export async function reviewScholarship(formData: FormData) {
   const name = str(formData, "name", 300);
   if (!name) throw new Error("Name is required");
 
-  const essayRaw = formData.get("essayRequired");
-  const essayRequired =
-    essayRaw === "yes" ? true : essayRaw === "no" ? false : null;
-
   const amountRaw = formData.get("amountValue");
   let amountValue: number | null = null;
   if (typeof amountRaw === "string" && amountRaw.trim()) {
@@ -69,7 +65,6 @@ export async function reviewScholarship(formData: FormData) {
       level: str(formData, "level", 120),
       description: bigText(formData, "description", 5000),
       eligibility: bigText(formData, "eligibility", 5000),
-      essayRequired,
       tags,
       status,
       reviewedAt: status === "PENDING" ? null : new Date(),

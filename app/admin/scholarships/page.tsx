@@ -152,20 +152,6 @@ export default async function AdminScholarships({
                     />
                   </label>
 
-                  {/* Essay required */}
-                  <div className="flex items-center gap-6 mb-4 text-sm">
-                    <span className="text-xs font-semibold text-gray-600">Essay required?</span>
-                    <label className="flex items-center gap-1">
-                      <input type="radio" name="essayRequired" value="yes" defaultChecked={s.essayRequired === true} /> Yes
-                    </label>
-                    <label className="flex items-center gap-1">
-                      <input type="radio" name="essayRequired" value="no" defaultChecked={s.essayRequired === false} /> No
-                    </label>
-                    <label className="flex items-center gap-1">
-                      <input type="radio" name="essayRequired" value="" defaultChecked={s.essayRequired === null} /> Unknown
-                    </label>
-                  </div>
-
                   {/* Filter tags */}
                   <div className="mb-5">
                     <span className="text-xs font-semibold text-gray-600 block mb-2">Filters / Tags</span>

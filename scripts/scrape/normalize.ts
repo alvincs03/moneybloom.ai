@@ -60,7 +60,6 @@ export function normalize(raw: ScrapedScholarship, source: string) {
     description: clean(raw.description, 5000),
     eligibility: clean(raw.eligibility, 5000),
     url: clean(raw.url, 1000),
-    essayRequired: typeof raw.essayRequired === "boolean" ? raw.essayRequired : null,
     level: clean(raw.level, 120),
     sourceUrl: clean(raw.sourceUrl, 1000),
     source,

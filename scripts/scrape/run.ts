@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { prisma } from "../../lib/prisma";
 import { normalize } from "./normalize";
+import { describeScholarship } from "./describe";
 import type { Source } from "./types";
 
 import { careerOneStopSource } from "./sources/careeronestop";
@@ -67,8 +68,23 @@ async function main() {
           });
           updated++;
         } else {
+          // Generate a clean, student-facing description (no-op without an API key).
+          const generated = await describeScholarship({
+            name: data.name,
+            organization: data.organization,
+            amount: data.amount,
+            eligibility: data.eligibility,
+            description: data.description,
+            level: data.level,
+          });
+
           await prisma.scholarship.create({
-            data: { ...data, url, status: "PENDING" },
+            data: {
+              ...data,
+              description: generated ?? data.description,
+              url,
+              status: "PENDING",
+            },
           });
           inserted++;
         }
