@@ -2,6 +2,8 @@ import "dotenv/config";
 import { prisma } from "../../lib/prisma";
 import { normalize } from "./normalize";
 import { composeDescription } from "../../lib/compose-description";
+import { classifyScholarship } from "../../lib/classify-scholarship";
+import { serializeTags } from "../../lib/scholarships";
 import { describeScholarship } from "./describe";
 import type { Source } from "./types";
 
@@ -86,8 +88,23 @@ async function main() {
           const description =
             generated ?? composeDescription(facts) ?? data.description;
 
+          // Suggest tags + state from the text (admin confirms during review).
+          const { tags, state } = classifyScholarship({
+            name: data.name,
+            organization: data.organization,
+            description: data.description,
+            eligibility: data.eligibility,
+          });
+
           await prisma.scholarship.create({
-            data: { ...data, description, url, status: "PENDING" },
+            data: {
+              ...data,
+              description,
+              tags: serializeTags(tags),
+              state,
+              url,
+              status: "PENDING",
+            },
           });
           inserted++;
         }
