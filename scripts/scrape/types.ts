@@ -11,6 +11,7 @@ export interface ScrapedScholarship {
   eligibility?: string | null;
   url?: string | null; // official/application URL
   level?: string | null;
+  state?: string | null; // explicit US state restriction, if the source knows it
   tags?: string[]; // suggested tags (admin still verifies)
   sourceUrl?: string | null; // page it was scraped from
 }

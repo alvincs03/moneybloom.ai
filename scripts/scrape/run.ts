@@ -8,11 +8,17 @@ import { describeScholarship } from "./describe";
 import type { Source } from "./types";
 
 import { careerOneStopSource } from "./sources/careeronestop";
+import { scholarshipAmericaSource } from "./sources/scholarship-america";
 import { htmlSites } from "./sources/html-sites";
 import { sampleSource } from "./sources/sample";
 
 // Register scraper sources here. Add new plugins to this list.
-const SOURCES: Source[] = [sampleSource, careerOneStopSource, ...htmlSites];
+const SOURCES: Source[] = [
+  sampleSource,
+  scholarshipAmericaSource,
+  careerOneStopSource,
+  ...htmlSites,
+];
 
 async function main() {
   const limitArg = process.argv.find((a) => a.startsWith("--limit="));
@@ -101,7 +107,7 @@ async function main() {
               ...data,
               description,
               tags: serializeTags(tags),
-              state,
+              state: data.state ?? state, // prefer a source-provided state
               url,
               status: "PENDING",
             },

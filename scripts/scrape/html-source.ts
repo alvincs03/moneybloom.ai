@@ -35,14 +35,14 @@ export interface HtmlSiteConfig {
   requestDelayMs?: number; // politeness delay between requests (default 1500)
 }
 
-const USER_AGENT =
+export const USER_AGENT =
   "moneybloomBot/1.0 (+https://moneybloom.ai; scholarship discovery for students)";
 
-function sleep(ms: number) {
+export function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-async function isAllowedByRobots(targetUrl: string): Promise<boolean> {
+export async function isAllowedByRobots(targetUrl: string): Promise<boolean> {
   try {
     const u = new URL(targetUrl);
     const res = await fetch(`${u.origin}/robots.txt`, {

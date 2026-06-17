@@ -1,4 +1,5 @@
 import type { ScrapedScholarship } from "./types";
+import { isValidState } from "../../lib/scholarships";
 
 // Collapse whitespace, trim, and cap length. Returns null for empty strings so
 // we never store noise. The length cap also protects the DB from absurdly
@@ -61,6 +62,7 @@ export function normalize(raw: ScrapedScholarship, source: string) {
     eligibility: clean(raw.eligibility, 5000),
     url: clean(raw.url, 1000),
     level: clean(raw.level, 120),
+    state: raw.state && isValidState(raw.state) ? raw.state : null,
     sourceUrl: clean(raw.sourceUrl, 1000),
     source,
   };
