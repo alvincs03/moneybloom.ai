@@ -5,26 +5,34 @@ import { prisma } from "@/lib/prisma";
 import { TAG_GROUPS, US_STATES, parseTags, isStatus } from "@/lib/scholarships";
 import { reviewScholarship, regenerateDescription } from "./actions";
 
+const PAGE_SIZE = 25;
+
 export default async function AdminScholarships({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; page?: string }>;
 }) {
   await requireAdminPage();
 
-  const { status: statusParam } = await searchParams;
+  const { status: statusParam, page: pageParam } = await searchParams;
   const status = isStatus(statusParam) ? statusParam : "PENDING";
+  const page = Math.max(1, parseInt(pageParam || "1", 10) || 1);
 
-  const [pendingCount, usableCount, rejectedCount, scholarships] = await Promise.all([
-    prisma.scholarship.count({ where: { status: "PENDING" } }),
-    prisma.scholarship.count({ where: { status: "USABLE" } }),
-    prisma.scholarship.count({ where: { status: "REJECTED" } }),
-    prisma.scholarship.findMany({
-      where: { status },
-      orderBy: { scrapedAt: "desc" },
-      take: 50,
-    }),
-  ]);
+  const [pendingCount, usableCount, rejectedCount, statusTotal, scholarships] =
+    await Promise.all([
+      prisma.scholarship.count({ where: { status: "PENDING" } }),
+      prisma.scholarship.count({ where: { status: "USABLE" } }),
+      prisma.scholarship.count({ where: { status: "REJECTED" } }),
+      prisma.scholarship.count({ where: { status } }),
+      prisma.scholarship.findMany({
+        where: { status },
+        orderBy: { scrapedAt: "desc" },
+        skip: (page - 1) * PAGE_SIZE,
+        take: PAGE_SIZE,
+      }),
+    ]);
+
+  const totalPages = Math.max(1, Math.ceil(statusTotal / PAGE_SIZE));
 
   const tabs = [
     { key: "PENDING", label: `Pending (${pendingCount})` },
@@ -237,6 +245,35 @@ export default async function AdminScholarships({
                 </form>
               );
             })}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-4 mt-8">
+            {page > 1 ? (
+              <Link
+                href={`/admin/scholarships?status=${status}&page=${page - 1}`}
+                className="px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-700 hover:bg-gray-50"
+              >
+                ← Prev
+              </Link>
+            ) : (
+              <span className="px-4 py-2 text-sm text-gray-300">← Prev</span>
+            )}
+            <span className="text-sm text-gray-600">
+              Page {page} of {totalPages}
+            </span>
+            {page < totalPages ? (
+              <Link
+                href={`/admin/scholarships?status=${status}&page=${page + 1}`}
+                className="px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-700 hover:bg-gray-50"
+              >
+                Next →
+              </Link>
+            ) : (
+              <span className="px-4 py-2 text-sm text-gray-300">Next →</span>
+            )}
           </div>
         )}
       </div>

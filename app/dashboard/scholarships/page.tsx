@@ -20,9 +20,17 @@ const ETHNICITY_TAGS = TAG_GROUPS["Race & Ethnicity"];
 export default async function Scholarships({
   searchParams,
 }: {
-  searchParams: Promise<{ tag?: string; amount?: string; q?: string; state?: string }>;
+  searchParams: Promise<{
+    tag?: string;
+    amount?: string;
+    q?: string;
+    state?: string;
+    page?: string;
+  }>;
 }) {
-  const { tag, amount, q, state } = await searchParams;
+  const { tag, amount, q, state, page: pageParam } = await searchParams;
+  const PAGE_SIZE = 24;
+  const page = Math.max(1, parseInt(pageParam || "1", 10) || 1);
 
   const where: Prisma.ScholarshipWhereInput = { status: "USABLE" };
   const and: Prisma.ScholarshipWhereInput[] = [];
@@ -55,8 +63,26 @@ export default async function Scholarships({
 
   const [count, scholarships] = await Promise.all([
     prisma.scholarship.count({ where }),
-    prisma.scholarship.findMany({ where, orderBy: { amountValue: "desc" }, take: 60 }),
+    prisma.scholarship.findMany({
+      where,
+      orderBy: { amountValue: "desc" },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    }),
   ]);
+  const totalPages = Math.max(1, Math.ceil(count / PAGE_SIZE));
+
+  // Href to a specific page, preserving the active filters.
+  const pageHref = (p: number) => {
+    const params = new URLSearchParams();
+    if (q) params.set("q", q);
+    if (tag) params.set("tag", tag);
+    if (amount) params.set("amount", amount);
+    if (state) params.set("state", state);
+    if (p > 1) params.set("page", String(p));
+    const s = params.toString();
+    return `/dashboard/scholarships${s ? `?${s}` : ""}`;
+  };
 
   // Build an href that toggles a tag/amount while preserving other params.
   const chipHref = (key: "tag" | "amount", value: string | null) => {
@@ -237,6 +263,35 @@ export default async function Scholarships({
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-4 mt-8">
+            {page > 1 ? (
+              <Link
+                href={pageHref(page - 1)}
+                className="px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-700 hover:bg-gray-50"
+              >
+                ← Prev
+              </Link>
+            ) : (
+              <span className="px-4 py-2 text-sm text-gray-300">← Prev</span>
+            )}
+            <span className="text-sm text-gray-600">
+              Page {page} of {totalPages}
+            </span>
+            {page < totalPages ? (
+              <Link
+                href={pageHref(page + 1)}
+                className="px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-700 hover:bg-gray-50"
+              >
+                Next →
+              </Link>
+            ) : (
+              <span className="px-4 py-2 text-sm text-gray-300">Next →</span>
+            )}
           </div>
         )}
       </div>
