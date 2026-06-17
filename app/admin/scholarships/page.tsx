@@ -162,6 +162,7 @@ export default async function AdminScholarships({
                   <label className="block mb-2">
                     <span className="text-xs font-semibold text-gray-600">Description</span>
                     <textarea
+                      key={`desc-${s.id}-${s.description ?? ""}`}
                       name="description"
                       defaultValue={s.description ?? ""}
                       rows={2}
