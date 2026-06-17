@@ -1,0 +1,144 @@
+// Prisma schema for moneybloom
+// Datasource: SQLite (local dev). Swap to postgresql for production.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// NextAuth / Auth.js models
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String? // null for OAuth-only users
+
+  accounts Account[]
+  sessions Session[]
+  profile  Profile?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ---------------------------------------------------------------------------
+// Application models
+// ---------------------------------------------------------------------------
+
+// One-to-one with User. Holds the questionnaire answers. Empty by default —
+// a User with no Profile row (or an all-null Profile) is treated as "not
+// filled out" by the dashboard, which then prompts them to complete it.
+model Profile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Academic
+  school String?
+  gpa    String?
+  gradeLevel String?
+  intendedMajor String?
+
+  // Financial background
+  householdIncome String?
+  firstGen        Boolean?
+  freeReducedLunch Boolean?
+  pellEligible    Boolean?
+
+  // Identity & background
+  ethnicity String?
+  gender    String?
+  state     String?
+  locality  String? // urban / suburban / rural
+
+  // Activities & awards
+  activities String? // free text / comma separated
+  awards     String? // honors, awards, distinctions
+  bio        String? // short one-line headline
+
+  // Essays
+  personalStatement String? // main personal statement
+  // Optional essays mapped to common scholarship prompts
+  challengeEssay   String? // a challenge or obstacle overcome
+  communityEssay   String? // community involvement / impact
+  goalsEssay       String? // academic & career goals
+  leadershipEssay  String? // a leadership experience
+  diversityEssay   String? // background / diversity / what makes you unique
+
+  completedAt DateTime? // set when the questionnaire is first completed
+  updatedAt   DateTime  @updatedAt
+}
+
+// Scholarships scraped from the web. New rows default to PENDING; an admin
+// reviews each and marks it USABLE or REJECTED. Only USABLE rows are shown
+// to students.
+model Scholarship {
+  id           String  @id @default(cuid())
+  name         String
+  organization String?
+  amount       String? // raw amount text, e.g. "$20,000" or "$5,000/yr"
+  deadline     String? // raw deadline text as scraped
+  description  String?
+  eligibility  String?
+  url          String? // official application URL
+  sourceUrl    String? // where we scraped it from
+  source       String? // which scraper plugin produced this row
+  tags         String? // comma-separated tags (canonical filter tags)
+
+  // Structured fields for filtering
+  amountValue  Int? // parsed max award in whole dollars, for range filters
+  level        String? // e.g. "High School", "Undergraduate"
+  state        String? // US state this is restricted to; null = national/any
+  deadlineDate DateTime? // parsed deadline when available
+
+  status     String    @default("PENDING") // PENDING | USABLE | REJECTED
+  scrapedAt  DateTime  @default(now())
+  reviewedAt DateTime?
+
+  @@unique([name, url])
+  @@index([status])
+}

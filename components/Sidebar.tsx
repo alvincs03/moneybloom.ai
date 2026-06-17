@@ -1,17 +1,37 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
-interface SidebarProps {
-  active?: string;
-}
+const baseItems = [
+  { id: 'dashboard', label: 'Dashboard', href: '/dashboard' },
+  { id: 'scholarships', label: 'Scholarships', href: '/dashboard/scholarships' },
+  { id: 'applications', label: 'Applications', href: '/dashboard/applications' },
+  { id: 'deadlines', label: 'Deadlines', href: '/dashboard/deadlines' },
+  { id: 'profile', label: 'Profile', href: '/dashboard/profile' },
+];
 
-export default function Sidebar({ active = 'dashboard' }: SidebarProps) {
-  const items = [
-    { id: 'dashboard', label: 'Dashboard', href: '/dashboard' },
-    { id: 'scholarships', label: 'Scholarships', href: '/dashboard/scholarships' },
-    { id: 'applications', label: 'Applications', href: '/dashboard/applications' },
-    { id: 'deadlines', label: 'Deadlines', href: '/dashboard/deadlines' },
-    { id: 'profile', label: 'Profile', href: '/dashboard/profile' },
-  ];
+export default function Sidebar() {
+  const pathname = usePathname();
+  const { data: session } = useSession();
+
+  const email = session?.user?.email ?? '';
+  const name = session?.user?.name || email.split('@')[0] || 'Account';
+  const initial = name.charAt(0).toUpperCase();
+
+  const items = [...baseItems];
+  if (session?.user?.isAdmin) {
+    items.push({ id: 'admin', label: 'Review Scholarships', href: '/admin/scholarships' });
+  }
+
+  // Highlight the item whose href is the longest matching prefix of the path.
+  const active = items.reduce<string | null>((best, item) => {
+    const match = pathname === item.href || pathname.startsWith(item.href + '/');
+    if (!match) return best;
+    const bestHref = items.find((i) => i.id === best)?.href ?? '';
+    return item.href.length >= bestHref.length ? item.id : best;
+  }, null);
 
   return (
     <aside className="w-60 bg-[#3c3c3c] text-white flex flex-col fixed left-0 top-0 h-screen">
@@ -40,11 +60,11 @@ export default function Sidebar({ active = 'dashboard' }: SidebarProps) {
 
       <div className="p-4 border-t border-gray-700 flex items-center gap-3">
         <div className="w-10 h-10 bg-[#c46039] rounded-full flex items-center justify-center text-sm font-bold">
-          AC
+          {initial}
         </div>
-        <div className="text-sm">
-          <p className="font-medium">Alvin Chen</p>
-          <p className="text-gray-400 text-xs">First-Gen Student</p>
+        <div className="text-sm overflow-hidden">
+          <p className="font-medium truncate">{name}</p>
+          <p className="text-gray-400 text-xs truncate">{email}</p>
         </div>
       </div>
     </aside>

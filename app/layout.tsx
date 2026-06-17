@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans, EB_Garamond } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { SessionWrapper } from "@/components/SessionWrapper";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -32,7 +32,7 @@ export default function RootLayout({
       className={`${dmSans.variable} ${ebGaramond.variable} h-full antialiased`}
     >
       <body className="min-h-screen bg-[#f5f0e8]">
-        <AuthProvider>{children}</AuthProvider>
+        <SessionWrapper>{children}</SessionWrapper>
       </body>
     </html>
   );
